@@ -25,14 +25,18 @@ def execute_ssh_command(host, command):
     for k in ('hostname', 'username', 'port'):
         if k in user_config:
             cfg[k] = user_config[k]
+    if 'identityfile' in user_config:
+        cfg['key_filename'] = user_config['identityfile']
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(cfg['hostname'], cfg['port'], cfg['username'])
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.WarningPolicy())
+    client.connect(cfg['hostname'], cfg['port'], cfg['username'], key_filename=cfg.get('key_filename'))
     stdin, stdout, stderr = client.exec_command(command)
     output = stdout.read().decode('utf-8')
     error = stderr.read().decode('utf-8')
     client.close()
     return output, error
+
 
 def stop_server():
     ec2.stop_instances(InstanceIds=[INSTANCE_ID])
