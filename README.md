@@ -1,6 +1,15 @@
-# Getting Started with Create React App
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Minecraft Server Controller
+This is a simple controller using the AWS cli through Flask, with a (very) simple UI built in react. 
+I take very little credit for the code written, and instead offer my grattitude to those who's code was absorbed by gpt-4. 
+
+## Usage
+First, set the global ip address for the Flask server in `./src/App.tsx`, then set an environment variable with your AWS instance ID named `INSTANCE_ID`. Setup the AWS cli client on your machine, then run the servers. 
+ 
+run `npm start` to get the UI going
+and `python3 ./server-contr*` to get the Flask backend going. 
+
+It should be reachable wherever the npm launcher says it is. 
 
 ## Available Scripts
 
@@ -28,19 +37,3 @@ The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
