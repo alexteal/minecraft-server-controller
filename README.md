@@ -2,6 +2,15 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 # Minecraft Server Controller
 This is a simple controller using the AWS cli through Flask, with a (very) simple UI built in react. 
 I take very little credit for the code written, and instead offer my grattitude to those who's code was absorbed by gpt-4. 
+
+## Usage
+First, set the global ip address for the Flask server in `./src/App.tsx`, then set an environment variable with your AWS instance ID named `INSTANCE_ID`. Setup the AWS cli client on your machine, then run the servers. 
+ 
+run `npm start` to get the UI going
+and `python3 ./server-contr*` to get the Flask backend going. 
+
+It should be reachable wherever the npm launcher says it is. 
+
 ## Available Scripts
 
 In the project directory, you can run:
