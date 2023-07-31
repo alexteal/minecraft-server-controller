@@ -4,16 +4,44 @@ import os
 import boto3
 import threading
 import time
+import paramiko
+import os
+
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
 ec2 = boto3.client('ec2')
 
 INSTANCE_ID=os.getenv('INSTANCE_ID')
+MINECRAFT_SERVER=os.getenv('MINECRAFT_SERVER')
+
+def execute_ssh_command(host, command):
+    ssh_config = paramiko.SSHConfig()
+    user_config_file = os.path.expanduser("~/.ssh/config")
+    if os.path.exists(user_config_file):
+        with open(user_config_file) as f:
+            ssh_config.parse(f)
+    cfg = {'hostname': host, 'username': None, 'port': 22}
+    user_config = ssh_config.lookup(cfg['hostname'])
+    for k in ('hostname', 'username', 'port'):
+        if k in user_config:
+            cfg[k] = user_config[k]
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(cfg['hostname'], cfg['port'], cfg['username'])
+    stdin, stdout, stderr = client.exec_command(command)
+    output = stdout.read().decode('utf-8')
+    error = stderr.read().decode('utf-8')
+    client.close()
+    return output, error
+
 def stop_server():
     ec2.stop_instances(InstanceIds=[INSTANCE_ID])
+
 class Timer:
     def __init__(self, seconds, target):
         self.target = target
+        if(seconds > 3600):
+            seconds = 3600
         self.thread = threading.Timer(seconds, self.target)
         self.start_time = time.time()
     def start(self):
@@ -24,6 +52,8 @@ class Timer:
         self.cancel()
         remaining = self.thread.interval - (time.time() - self.start_time)
         new_interval = remaining + seconds
+        if(new_interval > 3600):
+            new_interval = 3600
         self.thread = threading.Timer(new_interval, self.target)
         self.start_time = time.time()
         self.thread.start()
@@ -57,7 +87,11 @@ def increase_time():
 @app.route('/ip')
 def get_ip():
     response = ec2.describe_instances(InstanceIds=[INSTANCE_ID])
-    return response['Reservations'][0]['Instances'][0]['PublicIpAddress']
+    try:
+        return response['Reservations'][0]['Instances'][0]['PublicIpAddress']
+    except Exception as e:
+        print(e)
+        return 'too early to check for ip. refresh page!'
 @app.route('/time-left')
 def get_time_left():
     global timer
@@ -73,6 +107,14 @@ def get_time_left():
             return {"time-left": 3600}
     else:
         return {"time-left": -1}
+
+@app.route('/status')
+def get_system_status():
+    output, error = execute_ssh_command(MINECRAFT_SERVER, 'mscs status atm8')
+    if(error == None):
+        return {'status': output}
+    return {'status': error}
+   
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
 
