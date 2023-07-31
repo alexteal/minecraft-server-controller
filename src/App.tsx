@@ -110,7 +110,7 @@ const App: React.FC = () => {
             <button onClick={increaseTime}>Increase Time</button>
             <p>Server IP: {ip}</p>
             <p>Time left: {timeLeft} seconds</p>
-            <p>Status: {status}</p> {/* Display the status */}
+            <p>Status: {JSON.stringify(status)}</p> {/* Display the status */}
             <p>{error}</p>
         </div>
     );
