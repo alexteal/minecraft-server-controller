@@ -6,6 +6,7 @@ import threading
 import time
 import subprocess
 import os
+import traceback
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
@@ -27,27 +28,34 @@ print(output)
 
 def stop_server():
     ec2.stop_instances(InstanceIds=[INSTANCE_ID])
+    print("stopping server")
+    traceback.print_stack()
 
 class Timer:
     def __init__(self, seconds, target):
         self.target = target
-        if(seconds > 3600):
+        if seconds > 3600:
             seconds = 3600
         self.thread = threading.Timer(seconds, self.target)
         self.start_time = time.time()
+        self.is_running = False  # Add a flag to check if the timer is running
     def start(self):
         self.thread.start()
+        self.is_running = True
     def cancel(self):
         self.thread.cancel()
+        self.is_running = False
     def increase(self, seconds):
-        self.cancel()
+        if self.is_running:
+            self.cancel()  # Cancel the current timer if it's running
         remaining = self.thread.interval - (time.time() - self.start_time)
         new_interval = remaining + seconds
-        if(new_interval > 3600):
+        if new_interval > 3600:
             new_interval = 3600
         self.thread = threading.Timer(new_interval, self.target)
         self.start_time = time.time()
         self.thread.start()
+        self.is_running = True
     def get_remaining_time(self):
         if self.thread.is_alive():
             return self.thread.interval - (time.time() - self.start_time)
@@ -55,6 +63,7 @@ class Timer:
             return 0
 
 timer = None
+
 @app.route('/start')
 def start_server():
     global timer
@@ -62,6 +71,7 @@ def start_server():
     timer = Timer(7200, stop_server)
     timer.start()
     return 'Server started'
+
 @app.route('/stop')
 def stop_server_route():
     global timer
@@ -106,4 +116,5 @@ def get_system_status():
    
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
+
 
