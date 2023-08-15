@@ -46,16 +46,15 @@ class Timer:
         self.thread.cancel()
         self.is_running = False
     def increase(self, seconds):
-        if self.is_running:
-            self.cancel()  # Cancel the current timer if it's running
-        remaining = self.thread.interval - (time.time() - self.start_time)
-        new_interval = remaining + seconds
-        if new_interval > 3600:
-            new_interval = 3600
-        self.thread = threading.Timer(new_interval, self.target)
-        self.start_time = time.time()
-        self.thread.start()
-        self.is_running = True
+        if self.thread.is_alive():
+            remaining = self.thread.interval - (time.time() - self.start_time)
+            new_interval = remaining + seconds
+            if new_interval > 3600:
+                new_interval = 3600
+            self.thread.interval = new_interval
+            self.start_time = time.time()
+        else:
+            self.start()
     def get_remaining_time(self):
         if self.thread.is_alive():
             return self.thread.interval - (time.time() - self.start_time)
